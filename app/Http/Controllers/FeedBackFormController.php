@@ -5,10 +5,15 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreFeedbackRequest;
 use App\Models\FeedBack;
-use App\Jobs\QueueSenderEmail;
 
 class FeedBackFormController extends Controller
 {
+    protected $feedback;
+
+    public function __construct(FeedBack $feedback)
+    {
+        $this->feedback = $feedback;
+    }
 
     /**
      * Store a newly created resource in storage.
@@ -16,18 +21,12 @@ class FeedBackFormController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
+    
     public function store(StoreFeedbackRequest $request)
     {
-        $validatedData = $request->validated();
+        $this->feedback->SendMailToAdmin($request);
 
-        $feedback = FeedBack::create($validatedData);
-
-        $queue = new QueueSenderEmail($validatedData);
-        $this->dispatch($queue);
-
-        return redirect()
-				->back()
-				->with('message', "We will contact you shortly!");
+        return back()->with('message', "We will contact you shortly!");
     }
 
 }
